@@ -1,0 +1,191 @@
+---
+title: "Project Review"
+author: "Team X"
+date: '2024-09-26'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages(c("readxl", "dplyr", "ggplot2", "corrplot"))
+```
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(corrplot)
+```
+```{r}
+data <- read_excel("VibeCheck!.xlsx")
+```
+
+```{r}
+# Identify numeric columns
+numeric_columns <- sapply(data, is.numeric)
+
+# Calculate the median for each numeric column, ignoring NA values
+medians <- apply(data[, numeric_columns], 2, median, na.rm = TRUE)
+
+# Replace NA values in numeric columns with the respective median
+data[, numeric_columns] <- lapply(data[, numeric_columns], function(x) ifelse(is.na(x), medians[names(x)], x))
+
+```
+
+```{r}
+summary(data)
+
+# Frequency counts for categorical variables
+table(data$Gender)
+table(data$`Which Year are you studying in?`)
+
+```
+
+```{r}
+ggplot(data, aes(x = `I often doubt my own abilities.`)) +
+  geom_histogram(bins = 5, fill = "blue", color = "black") +
+  labs(title = "Distribution of Self-Doubt", x = "Self-Doubt Rating", y = "Frequency")
+
+```
+```{r}
+ggplot(data, aes(x = Gender, y = `My academic performance affects my well-being.`, fill = Gender)) +
+  geom_boxplot() +
+  labs(title = "Impact of Academic Performance on Well-being by Gender", x = "Gender", y = "Rating")
+
+```
+```{r}
+names(data)
+```
+```{r}
+table(data$`I often doubt my own abilities.`)
+```
+```{r}
+data$`I often doubt my own abilities.` <- factor(data$`I often doubt my own abilities.`)
+```
+
+```{r}
+# Bar Chart for clarity
+ggplot(data, aes(x = `I often doubt my own abilities.`, fill = `I often doubt my own abilities.`)) +
+  geom_bar() +
+  labs(title = "Self-Doubt Among Students", x = "Doubt Levels", y = "Count") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_minimal()
+
+
+```
+```{r}
+data$`I often doubt my own abilities.` <- as.numeric(as.factor(data$`I often doubt my own abilities.`))
+data$`I feel inadequate compared to my peers.` <- as.numeric(as.factor(data$`I feel inadequate compared to my peers.`))
+
+selected_vars <- data[, c('I often doubt my own abilities.', 'I feel inadequate compared to my peers.')]
+cor_matrix <- cor(selected_vars, use = "complete.obs")
+
+library(corrplot)
+corrplot(cor_matrix, method = "color")
+```
+```{r}
+#install.packages("openxlsx")
+```
+
+```{r}
+library(openxlsx)
+```
+
+```{r}
+write.xlsx(data, "Cleaned_VibeCheck_Responses.xlsx")
+```
+
+
+```{r}
+library(ggplot2)
+library(RColorBrewer)
+
+# Correct the column name according to your actual dataset
+ggplot(data, aes(x = `I feel inadequate compared to my peers.`)) +
+  geom_bar(aes(fill = `I feel inadequate compared to my peers.`), position = position_dodge()) +
+  labs(title = "Inadequacy Compared to Peers", x = "Level of Inadequacy", y = "Count of Responses") +
+  scale_fill_brewer(palette = "Set2")
+
+```
+
+```{r}
+library(ggplot2)
+
+# Correct the column name according to your actual dataset
+ggplot(data, aes(x = `I feel overwhelmed by the amount of academic work I have to complete within a short period of time.`)) +
+  geom_histogram(binwidth = 1, fill = "blue", color = "black") +
+  labs(title = "Academic Overwhelm Among Students", x = "Overwhelm Level", y = "Frequency")
+
+```
+```{r}
+table(data$`I feel anxious or worried about finding a job or internship placement.`)
+
+```
+```{r}
+data$`I feel anxious or worried about finding a job or internship placement.` <- factor(data$`I feel anxious or worried about finding a job or internship placement.`)
+
+```
+
+```{r}
+# Bar Chart to represent the same data
+ggplot(data, aes(x = `I feel anxious or worried about finding a job or internship placement.`, fill = `I feel anxious or worried about finding a job or internship placement.`)) +
+  geom_bar(stat = "count") +
+  geom_text(stat = 'count', aes(label = scales::percent(..count../sum(..count..))), vjust = -0.5, color = "black") +
+  scale_fill_brewer(palette = "Set3") +
+  labs(title = "Anxiety Regarding Job or Internship Placements", x = "Anxiety Level", y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+ 
+```
+```{r}
+library(ggplot2)
+
+# Assuming 'I frequently experience feelings of hopelessness or despair about my future prospects.' is a numeric scale
+ggplot(data, aes(x = `I frequently experience feelings of hopelessness or despair about my future prospects.`)) +
+  geom_histogram(fill = "purple", binwidth = 1) +
+  labs(title = "Feelings of Hopelessness or Despair", x = "Despair Level", y = "Count")
+
+```
+
+```{r}
+library(ggplot2)
+
+# Assuming 'I often feel hesitant to seek financial help from parents.' is a factor
+ggplot(data, aes(x = `I often feel hesitant to seek financial help from parents.`)) +
+  geom_bar(aes(fill = `I often feel hesitant to seek financial help from parents.`), position = position_dodge()) +
+  labs(title = "Seeking Financial Assistance from Parents", x = "Response Type", y = "Count")
+```
+```{r}
+library(ggplot2)
+
+# Assuming 'I push harder to meet my own expectations.' is a numeric variable
+ggplot(data, aes(x = `I push harder to meet my own expectations.`)) +
+  geom_density(aes(y = ..density..), fill = "lightblue") +
+  labs(title = "Pushing to Meet Own Expectations", x = "Expectation Level", y = "Density")
+
+```
+
+```{r}
+library(ggplot2)
+
+# Assuming 'I often feel guilty.' is a numeric scale
+ggplot(data, aes(x = `I often feel guilty.`)) +
+  geom_histogram(fill = "orange", binwidth = 1) +
+  labs(title = "Feelings of Guilt Among Students", x = "Guilt Level", y = "Frequency")
+```
+```{r}
+# Check if the data frame is loaded
+print(is.data.frame(data))
+
+# Print the column names of the data frame
+print(colnames(data))
+```
+
+```{r}
+
+```
+
